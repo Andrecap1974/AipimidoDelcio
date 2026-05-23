@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@theme {
+  --color-olive: #4A5D23;
+  --color-moss: #606C38;
+  --color-earth: #BC6C25;
+  --color-clay: #A47148;
+  --color-cream: #FEFAE0;
+  --color-paper: #F8F5F2;
+  --color-ink: #283618;
+  
+  --font-serif: "Georgia", serif;
+  --font-sans: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+  }
+}
+
+/* Custom fade effects and utility classes to enrich theme */
+.hero-vignette {
+  background: linear-gradient(rgba(74, 93, 35, 0.7), rgba(40, 54, 24, 0.82));
+}
+
+.dashed-clay-border {
+  border: 1px dashed var(--color-clay);
+}
