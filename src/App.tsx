@@ -48,7 +48,29 @@ export default function App() {
     // 1. Products
     const storedProds = localStorage.getItem('edelcio_products');
     if (storedProds) {
-      setProducts(JSON.parse(storedProds));
+      try {
+        let parsedProds = JSON.parse(storedProds);
+        let productsMigrated = false;
+        if (Array.isArray(parsedProds)) {
+          parsedProds = parsedProds.map((p: any) => {
+            if (p.image && p.image.includes('/src/assets/images/')) {
+              productsMigrated = true;
+              return { ...p, image: p.image.replace('/src/assets/images/', '/images/') };
+            }
+            return p;
+          });
+        } else {
+          parsedProds = INITIAL_PRODUCTS;
+          productsMigrated = true;
+        }
+        setProducts(parsedProds);
+        if (productsMigrated) {
+          localStorage.setItem('edelcio_products', JSON.stringify(parsedProds));
+        }
+      } catch (e) {
+        setProducts(INITIAL_PRODUCTS);
+        localStorage.setItem('edelcio_products', JSON.stringify(INITIAL_PRODUCTS));
+      }
     } else {
       setProducts(INITIAL_PRODUCTS);
       localStorage.setItem('edelcio_products', JSON.stringify(INITIAL_PRODUCTS));
@@ -57,7 +79,12 @@ export default function App() {
     // 2. Settings
     const storedSettings = localStorage.getItem('edelcio_settings');
     if (storedSettings) {
-      setSettings(JSON.parse(storedSettings));
+      try {
+        setSettings(JSON.parse(storedSettings));
+      } catch (e) {
+        setSettings(INITIAL_SETTINGS);
+        localStorage.setItem('edelcio_settings', JSON.stringify(INITIAL_SETTINGS));
+      }
     } else {
       setSettings(INITIAL_SETTINGS);
       localStorage.setItem('edelcio_settings', JSON.stringify(INITIAL_SETTINGS));
@@ -66,7 +93,12 @@ export default function App() {
     // 3. Neighborhoods
     const storedNeighs = localStorage.getItem('edelcio_neighborhoods');
     if (storedNeighs) {
-      setNeighborhoods(JSON.parse(storedNeighs));
+      try {
+        setNeighborhoods(JSON.parse(storedNeighs));
+      } catch (e) {
+        setNeighborhoods(INITIAL_NEIGHBORHOODS);
+        localStorage.setItem('edelcio_neighborhoods', JSON.stringify(INITIAL_NEIGHBORHOODS));
+      }
     } else {
       setNeighborhoods(INITIAL_NEIGHBORHOODS);
       localStorage.setItem('edelcio_neighborhoods', JSON.stringify(INITIAL_NEIGHBORHOODS));
@@ -75,7 +107,12 @@ export default function App() {
     // 4. Orders
     const storedOrders = localStorage.getItem('edelcio_orders');
     if (storedOrders) {
-      setOrders(JSON.parse(storedOrders));
+      try {
+        setOrders(JSON.parse(storedOrders));
+      } catch (e) {
+        setOrders(INITIAL_ORDERS);
+        localStorage.setItem('edelcio_orders', JSON.stringify(INITIAL_ORDERS));
+      }
     } else {
       setOrders(INITIAL_ORDERS);
       localStorage.setItem('edelcio_orders', JSON.stringify(INITIAL_ORDERS));
@@ -84,7 +121,34 @@ export default function App() {
     // 5. Cart
     const storedCart = localStorage.getItem('edelcio_cart');
     if (storedCart) {
-      setCart(JSON.parse(storedCart));
+      try {
+        let parsedCart = JSON.parse(storedCart);
+        let cartMigrated = false;
+        if (Array.isArray(parsedCart)) {
+          parsedCart = parsedCart.map((item: any) => {
+            if (item.product && item.product.image && item.product.image.includes('/src/assets/images/')) {
+              cartMigrated = true;
+              return {
+                ...item,
+                product: {
+                  ...item.product,
+                  image: item.product.image.replace('/src/assets/images/', '/images/')
+                }
+              };
+            }
+            return item;
+          });
+        } else {
+          parsedCart = [];
+          cartMigrated = true;
+        }
+        setCart(parsedCart);
+        if (cartMigrated) {
+          localStorage.setItem('edelcio_cart', JSON.stringify(parsedCart));
+        }
+      } catch (e) {
+        setCart([]);
+      }
     }
   }, []);
 
@@ -130,13 +194,14 @@ export default function App() {
 
   // --- CART OPERATIONS ---
   const handleAddToCart = (product: Product, quantity: number) => {
+    const qtyVal = Number(quantity) || 1;
     let newCart = [...cart];
     const existingIndex = newCart.findIndex((item) => item.product.id === product.id);
 
     if (existingIndex >= 0) {
-      newCart[existingIndex].quantity += quantity;
+      newCart[existingIndex].quantity = (Number(newCart[existingIndex].quantity) || 0) + qtyVal;
     } else {
-      newCart.push({ product, quantity });
+      newCart.push({ product, quantity: qtyVal });
     }
 
     setCart(newCart);
@@ -144,8 +209,9 @@ export default function App() {
   };
 
   const handleUpdateCartQuantity = (productId: string, quantity: number) => {
+    const qtyVal = Number(quantity) || 1;
     const newCart = cart.map((item) =>
-      item.product.id === productId ? { ...item, quantity: Math.max(1, quantity) } : item
+      item.product.id === productId ? { ...item, quantity: Math.max(1, qtyVal) } : item
     );
     setCart(newCart);
     localStorage.setItem('edelcio_cart', JSON.stringify(newCart));

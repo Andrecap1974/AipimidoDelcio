@@ -19,7 +19,7 @@ export default function Hero({
       {/* Background Graphic Content */}
       <div className="absolute inset-0 z-0 bg-ink">
         <img
-          src="/src/assets/images/mandioca_hero_1779549488591.png"
+          src="/images/mandioca_hero_1779549488591.png"
           alt="Lavoura e Aipim do Edelcio"
           className="w-full h-full object-cover opacity-25 select-none scale-105 transform motion-safe:animate-[pulse_10s_infinite]"
           referrerPolicy="no-referrer"

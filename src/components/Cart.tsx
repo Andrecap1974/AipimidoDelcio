@@ -202,7 +202,7 @@ ${itemSummaryText}
 ${customer.deliveryType === 'delivery' ? `  🏠 Endereço: ${customer.address}
   🏡 Bairro: ${customer.neighborhood}
   🌆 Cidade: ${customer.city}
-  ✉️ CEP: ${customer.cep || 'Não informado'}` : `  🏪 Ponto de Retirada: Estrada do Forte, N° 1250`}
+  ✉️ CEP: ${customer.cep || 'Não informado'}` : `  🏪 Ponto de Retirada: ${settings.address}`}
 
 *FORMA DE PAGAMENTO:*
   ${paymentMethodLabel}${changeSummary}

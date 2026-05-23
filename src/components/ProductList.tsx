@@ -10,23 +10,36 @@ interface ProductListProps {
 
 export default function ProductList({ products, onAddToCart }: ProductListProps) {
   // Store quantities for each product locally before adding to cart
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [quantities, setQuantities] = useState<Record<string, number | string>>({});
   const [addedItems, setAddedItems] = useState<Record<string, boolean>>({});
 
   const handleQtyChange = (productId: string, delta: number) => {
-    const current = quantities[productId] || 1;
+    const current = Number(quantities[productId]) || 1;
     const next = Math.max(1, current + delta);
     setQuantities({ ...quantities, [productId]: next });
   };
 
   const handleManualQtyChange = (productId: string, value: string) => {
+    if (value === '') {
+      setQuantities({ ...quantities, [productId]: '' });
+      return;
+    }
     const parsed = parseInt(value, 10);
-    const next = isNaN(parsed) || parsed < 1 ? 1 : parsed;
-    setQuantities({ ...quantities, [productId]: next });
+    if (!isNaN(parsed)) {
+      setQuantities({ ...quantities, [productId]: parsed });
+    }
+  };
+
+  const handleManualQtyBlur = (productId: string) => {
+    const current = quantities[productId];
+    if (current === undefined || current === '' || isNaN(Number(current)) || Number(current) < 1) {
+      setQuantities({ ...quantities, [productId]: 1 });
+    }
   };
 
   const handleAddClick = (product: Product) => {
-    const qty = quantities[product.id] || 1;
+    const rawQty = quantities[product.id];
+    const qty = rawQty === undefined || rawQty === '' || isNaN(Number(rawQty)) ? 1 : Number(rawQty);
     onAddToCart(product, qty);
     
     // Animate a success state on the specific product button
@@ -60,8 +73,9 @@ export default function ProductList({ products, onAddToCart }: ProductListProps)
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
           {products.map((product) => {
-            const qty = quantities[product.id] || 1;
+            const qty = quantities[product.id] !== undefined ? quantities[product.id] : 1;
             const isAdded = !!addedItems[product.id];
+            const qtyNum = Number(qty) || 1;
 
             return (
               <motion.div
@@ -118,7 +132,7 @@ export default function ProductList({ products, onAddToCart }: ProductListProps)
                         <button
                           onClick={() => handleQtyChange(product.id, -1)}
                           className="w-9 h-9 flex items-center justify-center bg-white border border-clay/15 text-ink hover:text-earth rounded-lg cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                          disabled={qty <= 1}
+                          disabled={qtyNum <= 1}
                         >
                           <Minus className="w-4 h-4" />
                         </button>
@@ -128,13 +142,14 @@ export default function ProductList({ products, onAddToCart }: ProductListProps)
                           inputMode="numeric"
                           value={qty}
                           onChange={(e) => handleManualQtyChange(product.id, e.target.value)}
+                          onBlur={() => handleManualQtyBlur(product.id)}
                           className="w-12 text-center font-bold text-ink bg-transparent border-0 focus:ring-0 text-sm focus:outline-none"
                         />
                         
                         <button
                           onClick={() => handleQtyChange(product.id, 1)}
                           className="w-9 h-9 flex items-center justify-center bg-white border border-clay/15 text-ink hover:text-earth rounded-lg cursor-pointer transition-colors disabled:opacity-40"
-                          disabled={qty >= product.availableWeight}
+                          disabled={qtyNum >= product.availableWeight}
                         >
                           <Plus className="w-4 h-4" />
                         </button>
@@ -161,7 +176,7 @@ export default function ProductList({ products, onAddToCart }: ProductListProps)
                       ) : (
                         <>
                           <ShoppingBag className="w-5 h-5" />
-                          <span>Adicionar {qty} kg ao Pedido</span>
+                          <span>Adicionar {qtyNum} kg ao Pedido</span>
                         </>
                       )}
                     </button>
