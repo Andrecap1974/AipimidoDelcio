@@ -1,4 +1,4 @@
-import { useState, useMemo, FormEvent } from 'react';
+import { useState, useMemo, FormEvent, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
@@ -60,6 +60,22 @@ export default function Cart({
   });
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Ensure we have a default neighborhood selected when neighborhoods load or change
+  useEffect(() => {
+    const activeNeighs = neighborhoods.filter((n) => n.active);
+    if (activeNeighs.length > 0) {
+      const currentIsValid = activeNeighs.some(
+        (n) => n.name.toLowerCase() === (customer.neighborhood || '').toLowerCase()
+      );
+      if (!currentIsValid) {
+        setCustomer((prev) => ({
+          ...prev,
+          neighborhood: activeNeighs[0].name,
+        }));
+      }
+    }
+  }, [neighborhoods, customer.neighborhood]);
 
   // Subtotal calculation
   const subtotal = useMemo(() => {
@@ -630,13 +646,7 @@ Aguardo a confirmação e o tempo de preparo! Muito obrigado!`;
                                 </button>
                               </div>
 
-                              <div className="flex gap-4 items-center bg-cream/10 p-2.5 rounded-xl border border-clay/10">
-                                {/* Simulated premium visual QR code box */}
-                                <div className="bg-white p-1.5 rounded-lg shrink-0 border border-clay/10">
-                                  <svg className="w-14 h-14 text-ink" viewBox="0 0 100 100">
-                                    <path fill="currentColor" d="M10,10 h30 v30 h-30 z M15,15 h20 v20 h-20 z M22,22 h6 v6 h-6 z M60,10 h30 v30 h-30 z M65,15 h20 v20 h-20 z M72,22 h6 v6 h-6 z M10,60 h30 v30 h-30 z M15,65 h20 v20 h-20 z M22,72 h6 v6 h-6 z M60,60 h10 v10 h-10 z M80,60 h10 v10 h-10 z M70,70 h10 v10 h-10 z M60,80 h10 v10 h-10 z M80,80 h10 v10 h-10 z M70,80 h10 v10 h-10 z M50,15 h5 v30 h-5 z M50,55 h5 v35 h-5 z" />
-                                  </svg>
-                                </div>
+                              <div className="flex gap-4 items-center bg-cream/10 p-3 rounded-xl border border-clay/10">
                                 <div className="text-[11px] leading-relaxed text-ink/80 font-serif">
                                   <p className="font-bold text-earth">Pague agora ou na entrega / retirada.</p>
                                   <p>Transfira o valor exato no seu aplicativo do banco usando a chave PIX acima.</p>

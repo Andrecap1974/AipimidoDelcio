@@ -868,7 +868,7 @@ export default function AdminPanel({
                             required
                             value={localSettings.pixKeyName}
                             onChange={(e) => setLocalSettings({ ...localSettings, pixKeyName: e.target.value })}
-                            placeholder="Ex: Edelcio dos Santos"
+                            placeholder="Ex: Edelcio Joao Frohlich"
                             className="w-full bg-stone-900 border border-stone-850 rounded-lg px-3 py-2 text-stone-100 outline-none focus:border-amber-500"
                           />
                         </div>

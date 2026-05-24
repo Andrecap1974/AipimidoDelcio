@@ -6,12 +6,15 @@ import { Product } from '../types';
 interface ProductListProps {
   products: Product[];
   onAddToCart: (product: Product, quantity: number) => void;
+  onForceImages?: (type: 'relative' | 'online') => void;
 }
 
-export default function ProductList({ products, onAddToCart }: ProductListProps) {
+export default function ProductList({ products, onAddToCart, onForceImages }: ProductListProps) {
   // Store quantities for each product locally before adding to cart
   const [quantities, setQuantities] = useState<Record<string, number | string>>({});
   const [addedItems, setAddedItems] = useState<Record<string, boolean>>({});
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const [isUsingOnlineImages, setIsUsingOnlineImages] = useState(false);
 
   const handleQtyChange = (productId: string, delta: number) => {
     const current = Number(quantities[productId]) || 1;
@@ -68,6 +71,40 @@ export default function ProductList({ products, onAddToCart }: ProductListProps)
           <p className="text-sm sm:text-base text-ink/80">
             Aipim fresquinho de excelente cozimento, amora e maciez. Embalado no capricho direto do "Edelcio" para sua família!
           </p>
+
+          {onForceImages && (
+            <div className="mt-6 flex flex-wrap gap-2.5 justify-center select-none text-xs">
+              <span className="text-ink/60 self-center font-serif font-bold">⚠️ Foto não aparece?</span>
+              <button
+                onClick={() => {
+                  onForceImages('relative');
+                  setIsUsingOnlineImages(false);
+                  setImageErrors({});
+                }}
+                className={`px-3 py-1.5 rounded-xl cursor-pointer transition-all border font-serif font-bold flex items-center gap-1 shadow-sm ${
+                  !isUsingOnlineImages 
+                    ? 'bg-olive text-white border-olive' 
+                    : 'bg-white hover:bg-cream border-clay/15 text-ink'
+                }`}
+              >
+                <span>🏠 Foto do Servidor (Local)</span>
+              </button>
+              <button
+                onClick={() => {
+                  onForceImages('online');
+                  setIsUsingOnlineImages(true);
+                  setImageErrors({});
+                }}
+                className={`px-3 py-1.5 rounded-xl cursor-pointer transition-all border font-serif font-bold flex items-center gap-1 shadow-sm ${
+                  isUsingOnlineImages 
+                    ? 'bg-olive text-white border-olive' 
+                    : 'bg-white hover:bg-cream border-clay/15 text-ink'
+                }`}
+              >
+                <span>🌐 Foto via Internet (Reserva)</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Products Grid */}
@@ -86,14 +123,34 @@ export default function ProductList({ products, onAddToCart }: ProductListProps)
                 transition={{ duration: 0.5 }}
                 className="group flex flex-col bg-white rounded-3xl overflow-hidden border border-clay/15 hover:border-moss/35 transition-all shadow-md hover:shadow-xl hover:-translate-y-1 relative"
               >
-                {/* Product Image Section */}
+                 {/* Product Image Section */}
                 <div className="relative aspect-4/3 overflow-hidden bg-cream/40">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    referrerPolicy="no-referrer"
-                  />
+                  {imageErrors[product.id] ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-cream/35 p-6 text-center space-y-2">
+                      <Wheat className="w-10 h-10 text-earth animate-pulse" />
+                      <span className="text-xs font-serif font-bold text-ink/75">Carregar Imagem</span>
+                      <button
+                        onClick={() => {
+                          if (onForceImages) {
+                            onForceImages('online');
+                            setIsUsingOnlineImages(true);
+                            setImageErrors({});
+                          }
+                        }}
+                        className="px-2.5 py-1 text-[10px] bg-earth text-white font-bold rounded-lg hover:bg-earth/95 transition-colors cursor-pointer"
+                      >
+                        Ativar Modo Internet
+                      </button>
+                    </div>
+                  ) : (
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      onError={() => setImageErrors((prev) => ({ ...prev, [product.id]: true }))}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      referrerPolicy="no-referrer"
+                    />
+                  )}
                   
                   {/* Stock Badge */}
                   <div className="absolute top-4 right-4 bg-white/90 text-olive border border-olive/20 px-3 py-1.5 rounded-xl font-mono text-xs select-none backdrop-blur-md font-bold">

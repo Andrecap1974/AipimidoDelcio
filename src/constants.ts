@@ -8,7 +8,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     pricePerKg: 5.00,
     unit: 'kg',
     availableWeight: 200,
-    image: '/images/aipim_com_casca_1779549507427.png'
+    image: './images/aipim_com_casca_1779549507427.png'
   },
   {
     id: 'aipim-descascado',
@@ -17,7 +17,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     pricePerKg: 8.00,
     unit: 'kg',
     availableWeight: 150,
-    image: '/images/aipim_descascado_1779549524886.png'
+    image: './images/aipim_descascado_1779549524886.png'
   }
 ];
 
@@ -41,7 +41,7 @@ export const INITIAL_SETTINGS: AppSettings = {
   deliveryEnabled: true,
   pixKey: '51999172765',
   pixType: 'Celular',
-  pixKeyName: 'Edelcio dos Santos'
+  pixKeyName: 'Edelcio Joao Frohlich'
 };
 
 export const INITIAL_ORDERS: OrderRecord[] = [
@@ -91,4 +91,4 @@ export const INITIAL_ORDERS: OrderRecord[] = [
   }
 ];
 
-export const HERO_IMAGE_URL = '/images/mandioca_hero_1779549488591.png';
+export const HERO_IMAGE_URL = './images/mandioca_hero_1779549488591.png';

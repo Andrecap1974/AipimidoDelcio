@@ -53,9 +53,15 @@ export default function App() {
         let productsMigrated = false;
         if (Array.isArray(parsedProds)) {
           parsedProds = parsedProds.map((p: any) => {
-            if (p.image && p.image.includes('/src/assets/images/')) {
+            if (p.image && (p.image.includes('/src/assets/images/') || p.image.startsWith('/images/'))) {
               productsMigrated = true;
-              return { ...p, image: p.image.replace('/src/assets/images/', '/images/') };
+              let cleanImage = p.image;
+              if (cleanImage.includes('/src/assets/images/')) {
+                cleanImage = cleanImage.replace('/src/assets/images/', './images/');
+              } else if (cleanImage.startsWith('/images/')) {
+                cleanImage = cleanImage.replace('/images/', './images/');
+              }
+              return { ...p, image: cleanImage };
             }
             return p;
           });
@@ -126,13 +132,19 @@ export default function App() {
         let cartMigrated = false;
         if (Array.isArray(parsedCart)) {
           parsedCart = parsedCart.map((item: any) => {
-            if (item.product && item.product.image && item.product.image.includes('/src/assets/images/')) {
+            if (item.product && item.product.image && (item.product.image.includes('/src/assets/images/') || item.product.image.startsWith('/images/'))) {
               cartMigrated = true;
+              let cleanImage = item.product.image;
+              if (cleanImage.includes('/src/assets/images/')) {
+                cleanImage = cleanImage.replace('/src/assets/images/', './images/');
+              } else if (cleanImage.startsWith('/images/')) {
+                cleanImage = cleanImage.replace('/images/', './images/');
+              }
               return {
                 ...item,
                 product: {
                   ...item.product,
-                  image: item.product.image.replace('/src/assets/images/', '/images/')
+                  image: cleanImage
                 }
               };
             }
@@ -190,6 +202,29 @@ export default function App() {
       alert('Dados restaurados com sucesso para os originais!');
       window.location.reload();
     }
+  };
+
+  const handleForceImages = (type: 'relative' | 'online') => {
+    const updated = products.map((prod) => {
+      if (prod.id === 'aipim-com-casca') {
+        return {
+          ...prod,
+          image: type === 'relative' 
+            ? './images/aipim_com_casca_1779549507427.png' 
+            : 'https://images.unsplash.com/photo-1590005354167-6da97870c913?auto=format&fit=crop&w=600&q=80'
+        };
+      } else if (prod.id === 'aipim-descascado') {
+        return {
+          ...prod,
+          image: type === 'relative' 
+            ? './images/aipim_descascado_1779549524886.png' 
+            : 'https://images.unsplash.com/photo-1574316071802-0d684efa7bf5?auto=format&fit=crop&w=600&q=80'
+        };
+      }
+      return prod;
+    });
+    setProducts(updated);
+    localStorage.setItem('edelcio_products', JSON.stringify(updated));
   };
 
   // --- CART OPERATIONS ---
@@ -270,6 +305,7 @@ export default function App() {
         <ProductList
           products={products}
           onAddToCart={handleAddToCart}
+          onForceImages={handleForceImages}
         />
       </div>
 
