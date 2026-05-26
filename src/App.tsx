@@ -34,135 +34,122 @@ import { getWhatsAppUrl } from './utils/phone';
 
 export default function App() {
   // --- STATE PERSISTENCE & CONTROL ---
-  const [products, setProducts] = useState<Product[]>([]);
-  const [settings, setSettings] = useState<AppSettings>(INITIAL_SETTINGS);
-  const [neighborhoods, setNeighborhoods] = useState<NeighborhoodDeliveryFee[]>([]);
-  const [orders, setOrders] = useState<OrderRecord[]>([]);
-  const [cart, setCart] = useState<OrderItem[]>([]);
+  // If the browser stores modified settings/products but the user is not an admin,
+  // we force values from INITIAL_PRODUCTS / INITIAL_SETTINGS to keep customer views accurate and up-to-date.
+  const [products, setProducts] = useState<Product[]>(() => {
+    const isClient = typeof window !== 'undefined';
+    const isAdminUser = isClient && localStorage.getItem('edelcio_has_admin_access') === 'true';
+    if (isClient && isAdminUser) {
+      const storedProds = localStorage.getItem('edelcio_products');
+      if (storedProds) {
+        try {
+          let parsedProds = JSON.parse(storedProds);
+          if (Array.isArray(parsedProds) && parsedProds.length > 0) {
+            // Safe image migrator
+            return parsedProds.map((p: any) => {
+              if (p.image && (p.image.includes('/src/assets/images/') || p.image.startsWith('/images/'))) {
+                let cleanImage = p.image;
+                if (cleanImage.includes('/src/assets/images/')) {
+                  cleanImage = cleanImage.replace('/src/assets/images/', './images/');
+                } else if (cleanImage.startsWith('/images/')) {
+                  cleanImage = cleanImage.replace('/images/', './images/');
+                }
+                return { ...p, image: cleanImage };
+              }
+              return p;
+            });
+          }
+        } catch (e) {}
+      }
+    }
+    return INITIAL_PRODUCTS;
+  });
+
+  const [settings, setSettings] = useState<AppSettings>(() => {
+    const isClient = typeof window !== 'undefined';
+    const isAdminUser = isClient && localStorage.getItem('edelcio_has_admin_access') === 'true';
+    if (isClient && isAdminUser) {
+      const storedSettings = localStorage.getItem('edelcio_settings');
+      if (storedSettings) {
+        try {
+          return JSON.parse(storedSettings);
+        } catch (e) {}
+      }
+    }
+    return INITIAL_SETTINGS;
+  });
+
+  const [neighborhoods, setNeighborhoods] = useState<NeighborhoodDeliveryFee[]>(() => {
+    const isClient = typeof window !== 'undefined';
+    const isAdminUser = isClient && localStorage.getItem('edelcio_has_admin_access') === 'true';
+    if (isClient && isAdminUser) {
+      const storedNeighs = localStorage.getItem('edelcio_neighborhoods');
+      if (storedNeighs) {
+        try {
+          return JSON.parse(storedNeighs);
+        } catch (e) {}
+      }
+    }
+    return INITIAL_NEIGHBORHOODS;
+  });
+
+  const [orders, setOrders] = useState<OrderRecord[]>(() => {
+    const isClient = typeof window !== 'undefined';
+    if (isClient) {
+      const storedOrders = localStorage.getItem('edelcio_orders');
+      if (storedOrders) {
+        try {
+          return JSON.parse(storedOrders);
+        } catch (e) {}
+      }
+    }
+    return INITIAL_ORDERS;
+  });
+
+  const [cart, setCart] = useState<OrderItem[]>(() => {
+    const isClient = typeof window !== 'undefined';
+    if (isClient) {
+      const storedCart = localStorage.getItem('edelcio_cart');
+      if (storedCart) {
+        try {
+          let parsedCart = JSON.parse(storedCart);
+          if (Array.isArray(parsedCart)) {
+            return parsedCart.map((item: any) => {
+              if (item.product && item.product.image && (item.product.image.includes('/src/assets/images/') || item.product.image.startsWith('/images/'))) {
+                let cleanImage = item.product.image;
+                if (cleanImage.includes('/src/assets/images/')) {
+                  cleanImage = cleanImage.replace('/src/assets/images/', './images/');
+                } else if (cleanImage.startsWith('/images/')) {
+                  cleanImage = cleanImage.replace('/images/', './images/');
+                }
+                return {
+                  ...item,
+                  product: {
+                    ...item.product,
+                    image: cleanImage
+                  }
+                };
+              }
+              return item;
+            });
+          }
+        } catch (e) {}
+      }
+    }
+    return [];
+  });
 
   // Modal open controllers
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Load initial states from localStorage
+  // Sync state values with localStorage on mount to ensure freshness across updates
   useEffect(() => {
-    // 1. Products
-    const storedProds = localStorage.getItem('edelcio_products');
-    if (storedProds) {
-      try {
-        let parsedProds = JSON.parse(storedProds);
-        let productsMigrated = false;
-        if (Array.isArray(parsedProds)) {
-          parsedProds = parsedProds.map((p: any) => {
-            if (p.image && (p.image.includes('/src/assets/images/') || p.image.startsWith('/images/'))) {
-              productsMigrated = true;
-              let cleanImage = p.image;
-              if (cleanImage.includes('/src/assets/images/')) {
-                cleanImage = cleanImage.replace('/src/assets/images/', './images/');
-              } else if (cleanImage.startsWith('/images/')) {
-                cleanImage = cleanImage.replace('/images/', './images/');
-              }
-              return { ...p, image: cleanImage };
-            }
-            return p;
-          });
-        } else {
-          parsedProds = INITIAL_PRODUCTS;
-          productsMigrated = true;
-        }
-        setProducts(parsedProds);
-        if (productsMigrated) {
-          localStorage.setItem('edelcio_products', JSON.stringify(parsedProds));
-        }
-      } catch (e) {
-        setProducts(INITIAL_PRODUCTS);
-        localStorage.setItem('edelcio_products', JSON.stringify(INITIAL_PRODUCTS));
-      }
-    } else {
-      setProducts(INITIAL_PRODUCTS);
-      localStorage.setItem('edelcio_products', JSON.stringify(INITIAL_PRODUCTS));
-    }
-
-    // 2. Settings
-    const storedSettings = localStorage.getItem('edelcio_settings');
-    if (storedSettings) {
-      try {
-        setSettings(JSON.parse(storedSettings));
-      } catch (e) {
-        setSettings(INITIAL_SETTINGS);
-        localStorage.setItem('edelcio_settings', JSON.stringify(INITIAL_SETTINGS));
-      }
-    } else {
-      setSettings(INITIAL_SETTINGS);
-      localStorage.setItem('edelcio_settings', JSON.stringify(INITIAL_SETTINGS));
-    }
-
-    // 3. Neighborhoods
-    const storedNeighs = localStorage.getItem('edelcio_neighborhoods');
-    if (storedNeighs) {
-      try {
-        setNeighborhoods(JSON.parse(storedNeighs));
-      } catch (e) {
-        setNeighborhoods(INITIAL_NEIGHBORHOODS);
-        localStorage.setItem('edelcio_neighborhoods', JSON.stringify(INITIAL_NEIGHBORHOODS));
-      }
-    } else {
-      setNeighborhoods(INITIAL_NEIGHBORHOODS);
-      localStorage.setItem('edelcio_neighborhoods', JSON.stringify(INITIAL_NEIGHBORHOODS));
-    }
-
-    // 4. Orders
-    const storedOrders = localStorage.getItem('edelcio_orders');
-    if (storedOrders) {
-      try {
-        setOrders(JSON.parse(storedOrders));
-      } catch (e) {
-        setOrders(INITIAL_ORDERS);
-        localStorage.setItem('edelcio_orders', JSON.stringify(INITIAL_ORDERS));
-      }
-    } else {
-      setOrders(INITIAL_ORDERS);
-      localStorage.setItem('edelcio_orders', JSON.stringify(INITIAL_ORDERS));
-    }
-
-    // 5. Cart
-    const storedCart = localStorage.getItem('edelcio_cart');
-    if (storedCart) {
-      try {
-        let parsedCart = JSON.parse(storedCart);
-        let cartMigrated = false;
-        if (Array.isArray(parsedCart)) {
-          parsedCart = parsedCart.map((item: any) => {
-            if (item.product && item.product.image && (item.product.image.includes('/src/assets/images/') || item.product.image.startsWith('/images/'))) {
-              cartMigrated = true;
-              let cleanImage = item.product.image;
-              if (cleanImage.includes('/src/assets/images/')) {
-                cleanImage = cleanImage.replace('/src/assets/images/', './images/');
-              } else if (cleanImage.startsWith('/images/')) {
-                cleanImage = cleanImage.replace('/images/', './images/');
-              }
-              return {
-                ...item,
-                product: {
-                  ...item.product,
-                  image: cleanImage
-                }
-              };
-            }
-            return item;
-          });
-        } else {
-          parsedCart = [];
-          cartMigrated = true;
-        }
-        setCart(parsedCart);
-        if (cartMigrated) {
-          localStorage.setItem('edelcio_cart', JSON.stringify(parsedCart));
-        }
-      } catch (e) {
-        setCart([]);
-      }
-    }
+    localStorage.setItem('edelcio_products', JSON.stringify(products));
+    localStorage.setItem('edelcio_settings', JSON.stringify(settings));
+    localStorage.setItem('edelcio_neighborhoods', JSON.stringify(neighborhoods));
+    localStorage.setItem('edelcio_orders', JSON.stringify(orders));
+    localStorage.setItem('edelcio_cart', JSON.stringify(cart));
   }, []);
 
   // Set localStorage values on edits
@@ -299,7 +286,10 @@ export default function App() {
       
       {/* 1. Header Navigation */}
       <Header
-        onAdminClick={() => setIsAdminOpen(true)}
+        onAdminClick={() => {
+          localStorage.setItem('edelcio_has_admin_access', 'true');
+          setIsAdminOpen(true);
+        }}
         onCartClick={() => setIsCartOpen(true)}
         cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
         onNavigateTo={handleNavigateTo}
@@ -374,7 +364,10 @@ export default function App() {
       {/* 5. App Footer Contacts & Rights */}
       <Footer
         settings={settings}
-        onAdminClick={() => setIsAdminOpen(true)}
+        onAdminClick={() => {
+          localStorage.setItem('edelcio_has_admin_access', 'true');
+          setIsAdminOpen(true);
+        }}
       />
 
       {/* Floating interactive WhatsApp Launcher Button */}

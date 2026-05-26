@@ -363,9 +363,6 @@ export default function AdminPanel({
                     Entrar no Painel
                   </button>
                 </form>
-                <div className="p-3 bg-stone-950 text-[10px] text-stone-400 border border-stone-850 rounded-lg">
-                  💡 Senha padrão do site: <strong className="text-amber-400 font-mono">edelcio123</strong>
-                </div>
               </div>
             ) : (
               <>

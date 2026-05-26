@@ -59,7 +59,7 @@ export default function Header({
               onClick={() => handleMenuClick('pedido')}
               className="hover:text-earth transition-colors text-ink/80 cursor-pointer"
             >
-              Fazer Pedido
+              Meu Carrinho
             </button>
             <button
               onClick={() => handleMenuClick('contato')}
@@ -79,7 +79,7 @@ export default function Header({
               id="header-cart-btn"
             >
               <ShoppingBag className="w-5 h-5" />
-              <span className="hidden sm:inline font-medium text-sm">Meu Pedido</span>
+              <span className="hidden sm:inline font-medium text-sm">Meu Carrinho</span>
               {cartCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 bg-earth text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white">
                   {cartCount}
@@ -125,7 +125,7 @@ export default function Header({
                 onClick={() => handleMenuClick('pedido')}
                 className="py-2.5 px-3 rounded-lg hover:bg-cream/40 hover:text-earth text-left transition-colors cursor-pointer"
               >
-                Fazer Pedido
+                Meu Carrinho
               </button>
               <button
                 onClick={() => handleMenuClick('contato')}
