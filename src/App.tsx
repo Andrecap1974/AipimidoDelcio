@@ -34,12 +34,11 @@ import { getWhatsAppUrl } from './utils/phone';
 
 export default function App() {
   // --- STATE PERSISTENCE & CONTROL ---
-  // If the browser stores modified settings/products but the user is not an admin,
-  // we force values from INITIAL_PRODUCTS / INITIAL_SETTINGS to keep customer views accurate and up-to-date.
+  // Load the modified settings/products directly from localStorage for both admin and client/mobile views
+  // to ensure always accurate, synchronized, and up-to-date data.
   const [products, setProducts] = useState<Product[]>(() => {
     const isClient = typeof window !== 'undefined';
-    const isAdminUser = isClient && localStorage.getItem('edelcio_has_admin_access') === 'true';
-    if (isClient && isAdminUser) {
+    if (isClient) {
       const storedProds = localStorage.getItem('edelcio_products');
       if (storedProds) {
         try {
@@ -67,8 +66,7 @@ export default function App() {
 
   const [settings, setSettings] = useState<AppSettings>(() => {
     const isClient = typeof window !== 'undefined';
-    const isAdminUser = isClient && localStorage.getItem('edelcio_has_admin_access') === 'true';
-    if (isClient && isAdminUser) {
+    if (isClient) {
       const storedSettings = localStorage.getItem('edelcio_settings');
       if (storedSettings) {
         try {
@@ -81,8 +79,7 @@ export default function App() {
 
   const [neighborhoods, setNeighborhoods] = useState<NeighborhoodDeliveryFee[]>(() => {
     const isClient = typeof window !== 'undefined';
-    const isAdminUser = isClient && localStorage.getItem('edelcio_has_admin_access') === 'true';
-    if (isClient && isAdminUser) {
+    if (isClient) {
       const storedNeighs = localStorage.getItem('edelcio_neighborhoods');
       if (storedNeighs) {
         try {
