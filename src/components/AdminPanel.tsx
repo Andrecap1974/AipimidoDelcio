@@ -76,6 +76,13 @@ export default function AdminPanel({
     setLocalSettings(settings);
   }, [settings]);
 
+  // Admin authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem('edelcio_admin_auth') === 'true';
+  });
+  const [passwordInput, setPasswordInput] = useState<string>('');
+  const [passwordError, setPasswordError] = useState<string>('');
+
   // Reusable custom toast state
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'err' } | null>(null);
 
@@ -266,6 +273,20 @@ export default function AdminPanel({
               </div>
 
               <div className="flex items-center gap-3">
+                {isAuthenticated && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAuthenticated(false);
+                      sessionStorage.removeItem('edelcio_admin_auth');
+                      showToast('Sessão encerrada!');
+                    }}
+                    className="px-3 py-1.5 text-[11px] font-mono font-bold bg-red-955 hover:bg-red-900/60 border border-red-900/40 text-red-500 rounded-lg cursor-pointer transition-all"
+                    title="Sair do painel administrativo"
+                  >
+                    Sair
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     setConfirmDialog({
@@ -292,8 +313,64 @@ export default function AdminPanel({
               </div>
             </div>
 
-            {/* Admin Tabs Bar */}
-            <div className="flex bg-stone-950/65 border-b border-stone-850 overflow-x-auto select-none shrink-0 scrollbar-none">
+            {!isAuthenticated ? (
+              <div className="flex-1 flex flex-col items-center justify-center p-8 sm:p-12 text-center max-w-sm mx-auto my-12 space-y-6">
+                <div className="w-16 h-16 bg-amber-950/40 border border-amber-500/20 text-amber-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                  <Lock className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-serif font-black text-amber-50">Painel Restrito</h3>
+                  <p className="text-stone-400 text-xs mt-2 leading-relaxed font-sans">
+                    Este painel é de acesso exclusivo para o administrador do site. Por favor, digite a senha.
+                  </p>
+                </div>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (passwordInput === 'edelcio123' || passwordInput === 'admin') {
+                      setIsAuthenticated(true);
+                      sessionStorage.setItem('edelcio_admin_auth', 'true');
+                      setPasswordError('');
+                      setPasswordInput('');
+                      showToast('Sessão iniciada com sucesso!');
+                    } else {
+                      setPasswordError('Senha incorreta. Tente novamente!');
+                    }
+                  }}
+                  className="w-full space-y-4"
+                >
+                  <div className="text-left">
+                    <label className="text-[10px] text-stone-400 font-mono block mb-1">Senha de Acesso</label>
+                    <input
+                      type="password"
+                      value={passwordInput}
+                      onChange={(e) => {
+                        setPasswordInput(e.target.value);
+                        if (passwordError) setPasswordError('');
+                      }}
+                      placeholder="Senha do administrador"
+                      className="w-full bg-stone-950 border border-stone-850 rounded-xl px-4 py-2.5 text-stone-100 outline-none focus:border-amber-500 font-mono text-center text-sm"
+                      autoFocus
+                    />
+                    {passwordError && (
+                      <p className="text-red-500 text-[10px] text-center mt-1.5 font-bold font-sans">{passwordError}</p>
+                    )}
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold font-sans text-xs rounded-xl cursor-pointer transition-colors"
+                  >
+                    Entrar no Painel
+                  </button>
+                </form>
+                <div className="p-3 bg-stone-950 text-[10px] text-stone-400 border border-stone-850 rounded-lg">
+                  💡 Senha padrão do site: <strong className="text-amber-400 font-mono">edelcio123</strong>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Admin Tabs Bar */}
+                <div className="flex bg-stone-950/65 border-b border-stone-850 overflow-x-auto select-none shrink-0 scrollbar-none">
               <button
                 onClick={() => setActiveTab('pedidos')}
                 className={`flex items-center gap-2 px-6 py-4 border-b-2 font-serif text-sm font-bold cursor-pointer whitespace-nowrap transition-all ${
@@ -659,7 +736,7 @@ export default function AdminPanel({
                               {p.description}
                             </p>
                             <div className="flex gap-4 items-center mt-1 text-[11px] font-mono text-stone-400">
-                              <span>Sabor: <strong className="text-amber-400">R$ {p.pricePerKg.toFixed(2)}/kg</strong></span>
+                              <span>Valor: <strong className="text-amber-400">R$ {p.pricePerKg.toFixed(2)}/kg</strong></span>
                               <span>Estoque: <strong className="text-emerald-400">{p.availableWeight} kg</strong></span>
                             </div>
                           </div>
@@ -706,21 +783,31 @@ export default function AdminPanel({
                         <div className="flex gap-3 items-center pt-1">
                           <button
                             type="button"
-                            onClick={() => onUpdateSettings({ ...settings, deliveryEnabled: true })}
+                            onClick={() => {
+                              const updated = { ...localSettings, deliveryEnabled: true };
+                              setLocalSettings(updated);
+                              onUpdateSettings(updated);
+                              showToast('Serviço de entrega habilitado!');
+                            }}
                             className={`px-4 py-2.5 rounded-xl font-bold font-serif transition-all cursor-pointer border ${
-                              settings.deliveryEnabled
+                              localSettings.deliveryEnabled
                                 ? 'bg-emerald-950/50 border-emerald-500 text-emerald-400 shadow-md'
                                 : 'bg-stone-900 border-stone-850 text-stone-400'
                             }`}
                           >
                             Habilitado
                           </button>
-
+ 
                           <button
                             type="button"
-                            onClick={() => onUpdateSettings({ ...settings, deliveryEnabled: false })}
+                            onClick={() => {
+                              const updated = { ...localSettings, deliveryEnabled: false };
+                              setLocalSettings(updated);
+                              onUpdateSettings(updated);
+                              showToast('Serviço de entrega desabilitado!');
+                            }}
                             className={`px-4 py-2.5 rounded-xl font-bold font-serif transition-all cursor-pointer border ${
-                              !settings.deliveryEnabled
+                              !localSettings.deliveryEnabled
                                 ? 'bg-red-950/50 border-red-500 text-red-400 shadow-md'
                                 : 'bg-stone-900 border-stone-850 text-stone-400'
                             }`}
@@ -732,7 +819,7 @@ export default function AdminPanel({
                           Se desativado, o carrinho forçará apenas a opção Retirada no Local.
                         </span>
                       </div>
-
+ 
                       {/* Minimum pricing */}
                       <div className="space-y-1.5">
                         <label className="text-stone-450 font-serif block">Valor Mínimo do Pedido (R$)</label>
@@ -741,8 +828,13 @@ export default function AdminPanel({
                           <input
                             type="number"
                             step="0.01"
-                            value={settings.minOrderValue}
-                            onChange={(e) => onUpdateSettings({ ...settings, minOrderValue: parseFloat(e.target.value) || 0 })}
+                            value={localSettings.minOrderValue}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value) || 0;
+                              const updated = { ...localSettings, minOrderValue: val };
+                              setLocalSettings(updated);
+                              onUpdateSettings(updated);
+                            }}
                             className="bg-stone-900 border border-stone-850 rounded-lg px-3 py-2.5 text-stone-100 outline-none focus:border-amber-500 font-mono text-sm max-w-[120px]"
                           />
                         </div>
@@ -948,6 +1040,8 @@ export default function AdminPanel({
               )}
 
              </div>
+              </>
+            )}
 
             {/* Custom Toast Notification inside AdminPanel */}
             <AnimatePresence>

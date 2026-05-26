@@ -169,6 +169,19 @@ export default function App() {
   const handleUpdateProducts = (updatedProds: Product[]) => {
     setProducts(updatedProds);
     localStorage.setItem('edelcio_products', JSON.stringify(updatedProds));
+
+    // Also synchronize the products inside the cart to prevent stale product details or prices!
+    setCart((prevCart) => {
+      const updatedCart = prevCart.map((item) => {
+        const matches = updatedProds.find((p) => p.id === item.product.id);
+        if (matches) {
+          return { ...item, product: matches };
+        }
+        return item;
+      });
+      localStorage.setItem('edelcio_cart', JSON.stringify(updatedCart));
+      return updatedCart;
+    });
   };
 
   const handleUpdateSettings = (updatedSett: AppSettings) => {
@@ -209,14 +222,14 @@ export default function App() {
           ...prod,
           image: type === 'relative' 
             ? './images/aipim_com_casca_1779549507427.png' 
-            : 'https://upload.wikimedia.org/wikipedia/commons/8/82/Cassava_roots.jpg'
+            : 'https://images.unsplash.com/photo-1590005354167-6da97870c913?auto=format&fit=crop&w=600&q=80'
         };
       } else if (prod.id === 'aipim-descascado') {
         return {
           ...prod,
           image: type === 'relative' 
             ? './images/aipim_descascado_1779549524886.png' 
-            : 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Cassave_wortels.jpg'
+            : 'https://images.unsplash.com/photo-1563865436874-9aef32095ffd?auto=format&fit=crop&w=600&q=80'
         };
       }
       return prod;

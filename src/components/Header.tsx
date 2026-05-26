@@ -47,7 +47,7 @@ export default function Header({
               onClick={() => handleMenuClick('home')}
               className="hover:text-earth transition-colors text-ink/80 cursor-pointer"
             >
-              Início
+              Inicio
             </button>
             <button
               onClick={() => handleMenuClick('produtos')}
@@ -66,14 +66,6 @@ export default function Header({
               className="hover:text-earth transition-colors text-ink/80 cursor-pointer"
             >
               Contato
-            </button>
-            
-            <button
-              onClick={onAdminClick}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-clay/20 hover:border-earth/30 text-ink/80 hover:text-earth hover:bg-cream/40 transition-all cursor-pointer font-sans"
-            >
-              <Settings className="w-4 h-4" />
-              <span>Painel Geral</span>
             </button>
           </nav>
 
@@ -121,7 +113,7 @@ export default function Header({
                 onClick={() => handleMenuClick('home')}
                 className="py-2.5 px-3 rounded-lg hover:bg-cream/40 hover:text-earth text-left transition-colors cursor-pointer"
               >
-                Início
+                Inicio
               </button>
               <button
                 onClick={() => handleMenuClick('produtos')}
@@ -141,19 +133,6 @@ export default function Header({
               >
                 Contato
               </button>
-              
-              <div className="pt-2 border-t border-clay/10">
-                <button
-                  onClick={() => {
-                    onAdminClick();
-                    setIsOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 py-2.5 px-3 rounded-lg bg-cream/40 hover:bg-cream border border-clay/10 hover:border-earth/30 text-left text-ink hover:text-earth transition-all font-sans cursor-pointer"
-                >
-                  <Settings className="w-4 h-4 text-earth" />
-                  <span>Painel de Administração</span>
-                </button>
-              </div>
             </div>
           </motion.div>
         )}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ShoppingBag, ChevronRight, Plus, Minus, Wheat, Check } from 'lucide-react';
 import { Product } from '../types';
@@ -15,6 +15,13 @@ export default function ProductList({ products, onAddToCart, onForceImages }: Pr
   const [addedItems, setAddedItems] = useState<Record<string, boolean>>({});
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [isUsingOnlineImages, setIsUsingOnlineImages] = useState(false);
+
+  // Synchronize button highlight and clear errors on product list updates
+  useEffect(() => {
+    const hasOnline = products.some(p => p.image && p.image.startsWith('http'));
+    setIsUsingOnlineImages(hasOnline);
+    setImageErrors({});
+  }, [products]);
 
   const handleQtyChange = (productId: string, delta: number) => {
     const current = Number(quantities[productId]) || 1;
