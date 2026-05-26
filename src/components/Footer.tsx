@@ -1,5 +1,6 @@
 import { Phone, MapPin, Clock, Sprout, Heart } from 'lucide-react';
 import { AppSettings } from '../types';
+import { formatPhoneNumber, getWhatsAppUrl } from '../utils/phone';
 
 interface FooterProps {
   settings: AppSettings;
@@ -43,7 +44,7 @@ export default function Footer({ settings, onAdminClick }: FooterProps) {
 
             <div className="space-y-3.5 text-xs">
               <a
-                href={`https://wa.me/${settings.phone}`}
+                href={getWhatsAppUrl(settings.phone)}
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-2.5 text-white/80 hover:text-cream transition-colors"
@@ -54,7 +55,7 @@ export default function Footer({ settings, onAdminClick }: FooterProps) {
                 <div>
                   <span className="font-sans block text-white/70">WhatsApp para Pedidos</span>
                   <span className="font-mono font-bold text-cream">
-                    (51) {settings.phone.slice(2, 7)}-{settings.phone.slice(7)}
+                    {formatPhoneNumber(settings.phone)}
                   </span>
                 </div>
               </a>

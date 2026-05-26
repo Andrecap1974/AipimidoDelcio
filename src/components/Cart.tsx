@@ -17,6 +17,7 @@ import {
   Copy
 } from 'lucide-react';
 import { Product, OrderItem, CustomerData, AppSettings, NeighborhoodDeliveryFee, OrderRecord } from '../types';
+import { getWhatsAppUrl } from '../utils/phone';
 
 interface CartProps {
   isOpen: boolean;
@@ -227,8 +228,7 @@ ${customer.deliveryType === 'delivery' ? `  🏠 Endereço: ${customer.address}
 Aguardo a confirmação e o tempo de preparo! Muito obrigado!`;
 
     // Encode URL text
-    const encodedText = encodeURIComponent(formatMessage);
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=${settings.phone}&text=${encodedText}`;
+    const whatsappUrl = getWhatsAppUrl(settings.phone, formatMessage);
 
     // Open WhatsApp link
     window.open(whatsappUrl, '_blank');

@@ -30,6 +30,7 @@ import ProductList from './components/ProductList';
 import Cart from './components/Cart';
 import AdminPanel from './components/AdminPanel';
 import Footer from './components/Footer';
+import { getWhatsAppUrl } from './utils/phone';
 
 export default function App() {
   // --- STATE PERSISTENCE & CONTROL ---
@@ -365,7 +366,7 @@ export default function App() {
 
       {/* Floating interactive WhatsApp Launcher Button */}
       <motion.a
-        href={`https://wa.me/${settings.phone}`}
+        href={getWhatsAppUrl(settings.phone)}
         target="_blank"
         rel="noreferrer"
         whileHover={{ scale: 1.05 }}
