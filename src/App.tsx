@@ -34,31 +34,35 @@ import { getWhatsAppUrl } from './utils/phone';
 
 export default function App() {
   // --- STATE PERSISTENCE & CONTROL ---
-  // Load the modified settings/products directly from localStorage for both admin and client/mobile views
-  // to ensure always accurate, synchronized, and up-to-date data.
+  // Load the modified settings/products directly from localStorage only for admins.
+  // Standard customers/visitors always see the latest code-defined INITIAL_PRODUCTS, INITIAL_SETTINGS,
+  // and INITIAL_NEIGHBORHOODS, solving Netlify / browser local-storage caching bugs.
   const [products, setProducts] = useState<Product[]>(() => {
     const isClient = typeof window !== 'undefined';
     if (isClient) {
-      const storedProds = localStorage.getItem('edelcio_products');
-      if (storedProds) {
-        try {
-          let parsedProds = JSON.parse(storedProds);
-          if (Array.isArray(parsedProds) && parsedProds.length > 0) {
-            // Safe image migrator
-            return parsedProds.map((p: any) => {
-              if (p.image && (p.image.includes('/src/assets/images/') || p.image.startsWith('/images/'))) {
-                let cleanImage = p.image;
-                if (cleanImage.includes('/src/assets/images/')) {
-                  cleanImage = cleanImage.replace('/src/assets/images/', './images/');
-                } else if (cleanImage.startsWith('/images/')) {
-                  cleanImage = cleanImage.replace('/images/', './images/');
+      const isAdminUser = localStorage.getItem('edelcio_has_admin_access') === 'true';
+      if (isAdminUser) {
+        const storedProds = localStorage.getItem('edelcio_products');
+        if (storedProds) {
+          try {
+            let parsedProds = JSON.parse(storedProds);
+            if (Array.isArray(parsedProds) && parsedProds.length > 0) {
+              // Safe image migrator
+              return parsedProds.map((p: any) => {
+                if (p.image && (p.image.includes('/src/assets/images/') || p.image.startsWith('/images/'))) {
+                  let cleanImage = p.image;
+                  if (cleanImage.includes('/src/assets/images/')) {
+                    cleanImage = cleanImage.replace('/src/assets/images/', './images/');
+                  } else if (cleanImage.startsWith('/images/')) {
+                    cleanImage = cleanImage.replace('/images/', './images/');
+                  }
+                  return { ...p, image: cleanImage };
                 }
-                return { ...p, image: cleanImage };
-              }
-              return p;
-            });
-          }
-        } catch (e) {}
+                return p;
+              });
+            }
+          } catch (e) {}
+        }
       }
     }
     return INITIAL_PRODUCTS;
@@ -67,11 +71,14 @@ export default function App() {
   const [settings, setSettings] = useState<AppSettings>(() => {
     const isClient = typeof window !== 'undefined';
     if (isClient) {
-      const storedSettings = localStorage.getItem('edelcio_settings');
-      if (storedSettings) {
-        try {
-          return JSON.parse(storedSettings);
-        } catch (e) {}
+      const isAdminUser = localStorage.getItem('edelcio_has_admin_access') === 'true';
+      if (isAdminUser) {
+        const storedSettings = localStorage.getItem('edelcio_settings');
+        if (storedSettings) {
+          try {
+            return JSON.parse(storedSettings);
+          } catch (e) {}
+        }
       }
     }
     return INITIAL_SETTINGS;
@@ -80,11 +87,14 @@ export default function App() {
   const [neighborhoods, setNeighborhoods] = useState<NeighborhoodDeliveryFee[]>(() => {
     const isClient = typeof window !== 'undefined';
     if (isClient) {
-      const storedNeighs = localStorage.getItem('edelcio_neighborhoods');
-      if (storedNeighs) {
-        try {
-          return JSON.parse(storedNeighs);
-        } catch (e) {}
+      const isAdminUser = localStorage.getItem('edelcio_has_admin_access') === 'true';
+      if (isAdminUser) {
+        const storedNeighs = localStorage.getItem('edelcio_neighborhoods');
+        if (storedNeighs) {
+          try {
+            return JSON.parse(storedNeighs);
+          } catch (e) {}
+        }
       }
     }
     return INITIAL_NEIGHBORHOODS;
@@ -142,9 +152,17 @@ export default function App() {
 
   // Sync state values with localStorage on mount to ensure freshness across updates
   useEffect(() => {
-    localStorage.setItem('edelcio_products', JSON.stringify(products));
-    localStorage.setItem('edelcio_settings', JSON.stringify(settings));
-    localStorage.setItem('edelcio_neighborhoods', JSON.stringify(neighborhoods));
+    const isAdminUser = localStorage.getItem('edelcio_has_admin_access') === 'true';
+    if (isAdminUser) {
+      localStorage.setItem('edelcio_products', JSON.stringify(products));
+      localStorage.setItem('edelcio_settings', JSON.stringify(settings));
+      localStorage.setItem('edelcio_neighborhoods', JSON.stringify(neighborhoods));
+    } else {
+      // Clear static lists caches so non-admin customers always fetch live code updates instantly
+      localStorage.removeItem('edelcio_products');
+      localStorage.removeItem('edelcio_settings');
+      localStorage.removeItem('edelcio_neighborhoods');
+    }
     localStorage.setItem('edelcio_orders', JSON.stringify(orders));
     localStorage.setItem('edelcio_cart', JSON.stringify(cart));
   }, []);

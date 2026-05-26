@@ -257,7 +257,7 @@ Aguardo a confirmação e o tempo de preparo! Muito obrigado!`;
           />
 
           {/* Right slide panel drawer container */}
-          <div className="absolute inset-y-0 right-0 max-w-full pl-10 flex">
+          <div className="absolute inset-y-0 right-0 max-w-full pl-0 sm:pl-10 flex">
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}

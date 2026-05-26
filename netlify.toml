@@ -1,0 +1,39 @@
+# Netlify Configuration File
+# Designed for maximum build speed, stable route redirects, and zero-caching of key entries
+
+[build]
+  # Directory where production-compiled assets are stored (Vite default is 'dist')
+  publish = "dist"
+
+  # Build command to compile assets
+  command = "npm run build"
+
+# Single-Page Application (SPA) Routing Redirects
+# This handles browser deep-link refreshes correctly, loading the entrypoint index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Custom HTTP headers to enforce instant client updates on deploy
+[[headers]]
+  for = "/*"
+    [headers.values]
+      X-Frame-Options = "DENY"
+      X-XSS-Protection = "1; mode=block"
+      X-Content-Type-Options = "nosniff"
+      Referrer-Policy = "no-referrer-when-downgrade"
+      # Prevent browser caching of index.html to force immediate checks on deploy
+      Cache-Control = "public, max-age=0, must-revalidate, no-cache, no-store"
+
+[[headers]]
+  for = "/assets/*"
+    [headers.values]
+      # Compile-hashed JS/CSS assets are completely immutable and safe to cache long-term
+      Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/images/*"
+    [headers.values]
+      # Static public images can be re-validated periodically
+      Cache-Control = "public, max-age=86400, must-revalidate"
