@@ -186,22 +186,19 @@ export default function App() {
   };
 
   const handleResetToDefaults = () => {
-    if (confirm('Deseja realmente apagar todas as edições locais e redefinir para os dados originais?')) {
-      setProducts(INITIAL_PRODUCTS);
-      setSettings(INITIAL_SETTINGS);
-      setNeighborhoods(INITIAL_NEIGHBORHOODS);
-      setOrders(INITIAL_ORDERS);
-      setCart([]);
-      
-      localStorage.setItem('edelcio_products', JSON.stringify(INITIAL_PRODUCTS));
-      localStorage.setItem('edelcio_settings', JSON.stringify(INITIAL_SETTINGS));
-      localStorage.setItem('edelcio_neighborhoods', JSON.stringify(INITIAL_NEIGHBORHOODS));
-      localStorage.setItem('edelcio_orders', JSON.stringify(INITIAL_ORDERS));
-      localStorage.setItem('edelcio_cart', JSON.stringify([]));
+    setProducts(INITIAL_PRODUCTS);
+    setSettings(INITIAL_SETTINGS);
+    setNeighborhoods(INITIAL_NEIGHBORHOODS);
+    setOrders(INITIAL_ORDERS);
+    setCart([]);
+    
+    localStorage.setItem('edelcio_products', JSON.stringify(INITIAL_PRODUCTS));
+    localStorage.setItem('edelcio_settings', JSON.stringify(INITIAL_SETTINGS));
+    localStorage.setItem('edelcio_neighborhoods', JSON.stringify(INITIAL_NEIGHBORHOODS));
+    localStorage.setItem('edelcio_orders', JSON.stringify(INITIAL_ORDERS));
+    localStorage.setItem('edelcio_cart', JSON.stringify([]));
 
-      alert('Dados restaurados com sucesso para os originais!');
-      window.location.reload();
-    }
+    window.location.reload();
   };
 
   const handleForceImages = (type: 'relative' | 'online') => {
@@ -211,14 +208,14 @@ export default function App() {
           ...prod,
           image: type === 'relative' 
             ? './images/aipim_com_casca_1779549507427.png' 
-            : 'https://images.unsplash.com/photo-1590005354167-6da97870c913?auto=format&fit=crop&w=600&q=80'
+            : 'https://upload.wikimedia.org/wikipedia/commons/8/82/Cassava_roots.jpg'
         };
       } else if (prod.id === 'aipim-descascado') {
         return {
           ...prod,
           image: type === 'relative' 
             ? './images/aipim_descascado_1779549524886.png' 
-            : 'https://images.unsplash.com/photo-1574316071802-0d684efa7bf5?auto=format&fit=crop&w=600&q=80'
+            : 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Cassave_wortels.jpg'
         };
       }
       return prod;

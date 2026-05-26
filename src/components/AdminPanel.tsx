@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
@@ -71,6 +71,30 @@ export default function AdminPanel({
   // Settings State changes
   const [localSettings, setLocalSettings] = useState<AppSettings>({ ...settings });
 
+  // Synchronization of localSettings state with settings prop
+  useEffect(() => {
+    setLocalSettings(settings);
+  }, [settings]);
+
+  // Reusable custom toast state
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'err' } | null>(null);
+
+  // Custom Toast trigger function
+  const showToast = (message: string, type: 'success' | 'err' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 4000);
+  };
+
+  // Reusable custom confirm dialog state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
+
   // Handle edit product action trigger
   const handleEditProductClick = (prod: Product) => {
     setEditingProduct(prod);
@@ -120,9 +144,16 @@ export default function AdminPanel({
   };
 
   const handleDeleteProduct = (prodId: string) => {
-    if (confirm('Tem certeza que deseja excluir este produto?')) {
-      onUpdateProducts(products.filter((p) => p.id !== prodId));
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Excluir Produto',
+      message: 'Tem certeza de que deseja excluir este produto? Essa ação não poderá ser desfazer e removerá o produto do catálogo.',
+      onConfirm: () => {
+        onUpdateProducts(products.filter((p) => p.id !== prodId));
+        setConfirmDialog(null);
+        showToast('Produto excluído com sucesso!');
+      },
+    });
   };
 
   // Add neighborhood delivey fee listing
@@ -140,6 +171,7 @@ export default function AdminPanel({
     onUpdateNeighborhoods([...neighborhoods, newNeigh]);
     setNewNeighName('');
     setNewNeighFee(0);
+    showToast('Bairro adicionado com sucesso!');
   };
 
   const handleToggleNeigh = (neighId: string) => {
@@ -147,29 +179,47 @@ export default function AdminPanel({
       n.id === neighId ? { ...n, active: !n.active } : n
     );
     onUpdateNeighborhoods(updated);
+    showToast('Status do bairro atualizado!');
   };
 
   const handleDeleteNeigh = (neighId: string) => {
-    onUpdateNeighborhoods(neighborhoods.filter((n) => n.id !== neighId));
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Remover Bairro',
+      message: 'Tem certeza de que deseja remover este bairro? Ele não aparecerá mais como opção de entrega.',
+      onConfirm: () => {
+        onUpdateNeighborhoods(neighborhoods.filter((n) => n.id !== neighId));
+        setConfirmDialog(null);
+        showToast('Bairro removido com sucesso!');
+      },
+    });
   };
 
   // Save Settings Changes
   const handleSettingsSubmit = (e: FormEvent) => {
     e.preventDefault();
     onUpdateSettings(localSettings);
-    alert('Configurações gerais salvas com sucesso!');
+    showToast('Configurações do negócio salvas com sucesso!');
   };
 
   // Edit received Order status
   const handleUpdateOrderStatus = (orderId: string, status: OrderRecord['status']) => {
     const updated = orders.map((o) => (o.id === orderId ? { ...o, status } : o));
     onUpdateOrders(updated);
+    showToast(`Pedido marcado como "${status}"`);
   };
 
   const handleDeleteOrder = (orderId: string) => {
-    if (confirm('Deseja excluir este registro de pedido do painel?')) {
-      onUpdateOrders(orders.filter((o) => o.id !== orderId));
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Excluir Pedido',
+      message: 'Deseja excluir este registro de pedido do painel? Essa ação não poderá ser desfazer e removerá o pedido definitivamente do histórico.',
+      onConfirm: () => {
+        onUpdateOrders(orders.filter((o) => o.id !== orderId));
+        setConfirmDialog(null);
+        showToast('Pedido excluído com sucesso!');
+      },
+    });
   };
 
   // Simple statistics
@@ -217,7 +267,17 @@ export default function AdminPanel({
 
               <div className="flex items-center gap-3">
                 <button
-                  onClick={onResetToDefaults}
+                  onClick={() => {
+                    setConfirmDialog({
+                      isOpen: true,
+                      title: 'Redefinir Configurações',
+                      message: 'Deseja realmente apagar todas as edições locais e redefinir para os dados originais do site? Todas as alterações estocadas no navegador serão apagadas.',
+                      onConfirm: () => {
+                        onResetToDefaults();
+                        setConfirmDialog(null);
+                      },
+                    });
+                  }}
                   className="px-3 py-1.5 text-[11px] font-mono font-bold bg-amber-950/40 hover:bg-stone-850 text-amber-500 border border-amber-900/30 rounded-lg cursor-pointer transition-all"
                   title="Restaurar dados de simulação padrões"
                 >
@@ -887,7 +947,63 @@ export default function AdminPanel({
                 </div>
               )}
 
-            </div>
+             </div>
+
+            {/* Custom Toast Notification inside AdminPanel */}
+            <AnimatePresence>
+              {toast && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[100] px-5 py-3 bg-stone-900 border border-emerald-500/30 text-stone-100 rounded-2xl shadow-xl flex items-center gap-3 font-serif select-none"
+                >
+                  <div className="w-5 h-5 flex items-center justify-center bg-emerald-950/40 text-emerald-400 rounded-full border border-emerald-500/20">
+                    <Check className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="text-xs font-bold leading-none">{toast.message}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Custom Confirm Dialog Modal */}
+            <AnimatePresence>
+              {confirmDialog && confirmDialog.isOpen && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                    className="w-full max-w-sm bg-stone-900 border border-stone-800 rounded-3xl p-6 shadow-2xl relative"
+                  >
+                    <h3 className="text-sm font-serif font-black text-amber-50 mb-2">
+                      {confirmDialog.title}
+                    </h3>
+                    <p className="text-xs text-stone-400 leading-relaxed mb-6">
+                      {confirmDialog.message}
+                    </p>
+                    
+                    <div className="flex gap-3 justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDialog(null)}
+                        className="px-4 py-2 border border-stone-850 hover:bg-stone-800 text-stone-400 hover:text-stone-200 text-xs font-bold rounded-xl cursor-pointer transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={confirmDialog.onConfirm}
+                        className="px-4 py-2 bg-red-900 hover:bg-red-800 border border-red-700/50 text-stone-100 text-xs font-bold rounded-xl cursor-pointer transition-colors"
+                      >
+                        Confirmar
+                      </button>
+                    </div>
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
+
           </motion.div>
         </div>
       )}
