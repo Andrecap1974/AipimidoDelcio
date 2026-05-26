@@ -112,8 +112,10 @@ export default function ProductList({ products, onAddToCart, onForceImages }: Pr
               </button>
             </div>
           )}
-            {/* Products Grid */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-6 md:gap-8 lg:gap-12 max-w-5xl mx-auto">
+        </div>
+
+        {/* Products Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
           {products.map((product) => {
             const qty = quantities[product.id] !== undefined ? quantities[product.id] : 1;
             const isAdded = !!addedItems[product.id];
@@ -126,14 +128,14 @@ export default function ProductList({ products, onAddToCart, onForceImages }: Pr
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.5 }}
-                className="group flex flex-col bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-clay/15 hover:border-moss/35 transition-all shadow-md hover:shadow-xl hover:-translate-y-1 relative"
+                className="group flex flex-col bg-white rounded-3xl overflow-hidden border border-clay/15 hover:border-moss/35 transition-all shadow-md hover:shadow-xl hover:-translate-y-1 relative"
               >
                  {/* Product Image Section */}
                 <div className="relative aspect-4/3 overflow-hidden bg-cream/40">
                   {imageErrors[product.id] ? (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-cream/35 p-3 sm:p-6 text-center space-y-1 sm:space-y-2">
-                       <Wheat className="w-6 h-6 sm:w-10 sm:h-10 text-earth animate-pulse" />
-                      <span className="text-[10px] sm:text-xs font-serif font-bold text-ink/75">Carregar Imagem</span>
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-cream/35 p-6 text-center space-y-2">
+                      <Wheat className="w-10 h-10 text-earth animate-pulse" />
+                      <span className="text-xs font-serif font-bold text-ink/75">Carregar Imagem</span>
                       <button
                         onClick={() => {
                           if (onForceImages) {
@@ -142,7 +144,7 @@ export default function ProductList({ products, onAddToCart, onForceImages }: Pr
                             setImageErrors({});
                           }
                         }}
-                        className="px-2 py-0.5 sm:px-2.5 sm:py-1 text-[8px] sm:text-[10px] bg-earth text-white font-bold rounded-lg hover:bg-earth/95 transition-colors cursor-pointer"
+                        className="px-2.5 py-1 text-[10px] bg-earth text-white font-bold rounded-lg hover:bg-earth/95 transition-colors cursor-pointer"
                       >
                         Ativar Modo Internet
                       </button>
@@ -158,45 +160,45 @@ export default function ProductList({ products, onAddToCart, onForceImages }: Pr
                   )}
                   
                   {/* Stock Badge */}
-                  <div className="absolute top-1.5 right-1.5 sm:top-4 sm:right-4 bg-white/90 text-olive border border-olive/20 px-1.5 py-0.5 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl font-mono text-[9px] sm:text-xs select-none backdrop-blur-md font-bold">
-                    Disp: <span className="font-bold text-moss">{product.availableWeight} kg</span>
+                  <div className="absolute top-4 right-4 bg-white/90 text-olive border border-olive/20 px-3 py-1.5 rounded-xl font-mono text-xs select-none backdrop-blur-md font-bold">
+                    Disponível: <span className="font-bold text-moss">{product.availableWeight} kg</span>
                   </div>
 
                   {/* Pricing Badge (float over image) */}
-                  <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-4 bg-gradient-to-t from-black/75 to-black/0 flex items-end justify-between">
-                    <span className="text-sm sm:text-2xl font-serif font-black text-white">
+                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-black/0 flex items-end justify-between">
+                    <span className="text-2xl font-serif font-black text-white">
                       R$ {product.pricePerKg.toFixed(2)}
-                      <span className="text-[10px] sm:text-xs text-white/80 font-sans font-normal lowercase select-none"> / {product.unit}</span>
+                      <span className="text-xs text-white/80 font-sans font-normal lowercase select-none"> / {product.unit}</span>
                     </span>
                   </div>
                 </div>
 
                 {/* Body Content */}
-                <div className="p-3 sm:p-6 md:p-8 flex-1 flex flex-col justify-between space-y-3 sm:space-y-6">
-                  <div className="space-y-1.5 sm:space-y-3">
-                    <h3 className="text-sm sm:text-lg md:text-2xl font-serif font-bold text-ink group-hover:text-moss transition-colors line-clamp-1">
+                <div className="p-6 sm:p-8 flex-1 flex flex-col justify-between space-y-6">
+                  <div className="space-y-3">
+                    <h3 className="text-xl sm:text-2xl font-serif font-bold text-ink group-hover:text-moss transition-colors">
                       {product.name}
                     </h3>
-                    <p className="text-[10px] sm:text-xs md:text-sm text-ink/80 leading-relaxed min-h-[30px] sm:min-h-[48px] line-clamp-2">
+                    <p className="text-xs sm:text-sm text-ink/80 leading-relaxed min-h-[48px]">
                       {product.description}
                     </p>
                   </div>
 
                   {/* Quantity and Checkout interaction */}
-                  <div className="pt-2 sm:pt-4 border-t border-clay/10 space-y-2.5 sm:space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4">
-                      <span className="text-[9px] sm:text-xs font-mono uppercase tracking-widest text-[#283618]/70 select-none font-bold">
-                        Qtd (kg)
+                  <div className="pt-4 border-t border-clay/10 space-y-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-xs font-mono uppercase tracking-widest text-[#283618]/70 select-none font-bold">
+                        Quantidade (kg)
                       </span>
                       
                       {/* Counter Controls */}
-                      <div className="flex items-center gap-0.5 sm:gap-1 bg-cream/50 p-1 rounded-lg sm:rounded-xl border border-clay/10">
+                      <div className="flex items-center gap-1 bg-cream/50 p-1.5 rounded-xl border border-clay/10">
                         <button
                           onClick={() => handleQtyChange(product.id, -1)}
-                          className="w-6 h-6 sm:w-9 sm:h-9 flex items-center justify-center bg-white border border-clay/15 text-ink hover:text-earth rounded-md sm:rounded-lg cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="w-9 h-9 flex items-center justify-center bg-white border border-clay/15 text-ink hover:text-earth rounded-lg cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                           disabled={qtyNum <= 1}
                         >
-                          <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <Minus className="w-4 h-4" />
                         </button>
                         
                         <input
@@ -205,15 +207,15 @@ export default function ProductList({ products, onAddToCart, onForceImages }: Pr
                           value={qty}
                           onChange={(e) => handleManualQtyChange(product.id, e.target.value)}
                           onBlur={() => handleManualQtyBlur(product.id)}
-                          className="w-8 sm:w-12 text-center font-bold text-ink bg-transparent border-0 focus:ring-0 text-xs sm:text-sm focus:outline-none"
+                          className="w-12 text-center font-bold text-ink bg-transparent border-0 focus:ring-0 text-sm focus:outline-none"
                         />
                         
                         <button
                           onClick={() => handleQtyChange(product.id, 1)}
-                          className="w-6 h-6 sm:w-9 sm:h-9 flex items-center justify-center bg-white border border-clay/15 text-ink hover:text-earth rounded-md sm:rounded-lg cursor-pointer transition-colors disabled:opacity-40"
+                          className="w-9 h-9 flex items-center justify-center bg-white border border-clay/15 text-ink hover:text-earth rounded-lg cursor-pointer transition-colors disabled:opacity-40"
                           disabled={qtyNum >= product.availableWeight}
                         >
-                          <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <Plus className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
@@ -222,25 +224,23 @@ export default function ProductList({ products, onAddToCart, onForceImages }: Pr
                     <button
                       onClick={() => handleAddClick(product)}
                       disabled={product.availableWeight <= 0}
-                      className={`w-full py-2 sm:py-4 px-2 sm:px-6 rounded-lg sm:rounded-2xl font-serif font-bold text-[10px] sm:text-base flex items-center justify-center gap-1 sm:gap-2 transition-all cursor-pointer shadow-sm sm:shadow-md active:scale-[0.98] ${
+                      className={`w-full py-4 px-6 rounded-2xl font-serif font-bold text-base flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-[0.98] ${
                         product.availableWeight <= 0
                           ? 'bg-cream border border-clay/10 text-[#283618]/45 cursor-not-allowed shadow-none'
                           : isAdded
-                          ? 'bg-moss hover:bg-olive text-white border border-moss/10 shadow-sm sm:shadow-md'
-                          : 'bg-olive hover:bg-moss text-white border border-olive/10 shadow-sm sm:shadow-md'
+                          ? 'bg-moss hover:bg-olive text-white border border-moss/10 shadow-md'
+                          : 'bg-olive hover:bg-moss text-white border border-olive/10 shadow-md'
                       }`}
                     >
                       {isAdded ? (
                         <>
-                          <Check className="w-3 h-3 sm:w-5 sm:h-5 animate-bounce" />
-                          <span className="hidden sm:inline">Adicionado ao Pedido!</span>
-                          <span className="inline sm:hidden">Adicionado!</span>
+                          <Check className="w-5 h-5 animate-bounce" />
+                          <span>Adicionado ao Pedido!</span>
                         </>
                       ) : (
                         <>
-                          <ShoppingBag className="w-3 h-3 sm:w-5 sm:h-5" />
-                          <span className="hidden sm:inline">Adicionar {qtyNum} kg ao Pedido</span>
-                          <span className="inline sm:hidden">Pedir {qtyNum} kg</span>
+                          <ShoppingBag className="w-5 h-5" />
+                          <span>Adicionar {qtyNum} kg ao Pedido</span>
                         </>
                       )}
                     </button>
@@ -249,7 +249,7 @@ export default function ProductList({ products, onAddToCart, onForceImages }: Pr
               </motion.div>
             );
           })}
-        </div>       </div>
+        </div>
       </div>
     </section>
   );
