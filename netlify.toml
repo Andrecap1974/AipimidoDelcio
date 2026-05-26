@@ -1,0 +1,45 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Single-Page Application (SPA) routing fallback rule
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Strict anti-cache headers configuration for HTML pages
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    CDN-Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-No-Cache = "true"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    CDN-Cache-Control = "public, max-age=0, must-revalidate"
+    Netlify-CDN-No-Cache = "true"
+
+# Cache-control for static assets (JavaScript, CSS, fonts, etc.) that have unique hashed filenames
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Cache-control for assets that could change but are stored in public folder
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Global security headers for all files
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
